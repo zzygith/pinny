@@ -180,11 +180,12 @@ class PointSetBC:
     """
 
     def __init__(
-        self, points, values, component=0, batch_size=None, shuffle=True
+        self, points, values, component=0, batch_size=None, shuffle=True, cVariable=None
     ):
         self.points = np.array(points, dtype=config.real(np))
         self.values = bkd.as_tensor(values, dtype=config.real(bkd.lib))
         self.component = component
+        self.cVariable = cVariable
         if isinstance(component, list) and backend_name != "pytorch":
             # TODO: Add support for multiple components in other backends
             raise RuntimeError(
@@ -238,7 +239,7 @@ class PointSetBC:
         # else:
         #    calculated_error = outputs[beg:end, self.component[0]] - self.values
         # return calculated_error
-        return outputs[beg:end, self.component] - self.values
+        return self.cVariable[0]*outputs[beg:end, self.component[0]]+self.cVariable[1]*outputs[beg:end, self.component[1]]+self.cVariable[2]*outputs[beg:end, self.component[2]] - self.values
 
 
 class PointSetOperatorBC:
